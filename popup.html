@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browser Pet</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      width: 300px;
+      padding: 16px;
+      background: #1e1e2e;
+      color: #cdd6f4;
+    }
+
+    header { margin-bottom: 16px; }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #cba6f7;
+      margin-bottom: 4px;
+    }
+
+    #domain {
+      font-size: 12px;
+      color: #a6adc8;
+    }
+
+    .toggle-row { margin-top: 16px; }
+
+    .theme-description {
+      font-size: 12px;
+      color: #a6adc8;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .controls {
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .control-card {
+      padding: 12px;
+      background: #2a2c3d;
+      border: 1px solid #45475a;
+      border-radius: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field + .field {
+      margin-top: 10px;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .field label,
+    .check-copy {
+      font-size: 12px;
+      color: #cdd6f4;
+    }
+
+    .field-note {
+      font-size: 11px;
+      color: #8b8fa8;
+      line-height: 1.4;
+    }
+
+    .field select,
+    .field input[type="range"] {
+      width: 100%;
+    }
+
+    .field select {
+      background: #1e2030;
+      color: #cdd6f4;
+      border: 1px solid #585b70;
+      border-radius: 8px;
+      padding: 8px 10px;
+      outline: none;
+    }
+
+    .field select:focus,
+    .field input[type="range"]:focus-visible {
+      outline: 2px solid #cba6f7;
+      outline-offset: 2px;
+    }
+
+    .field input[type="range"] {
+      accent-color: #cba6f7;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .check-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #cba6f7;
+      flex-shrink: 0;
+    }
+
+    .controls.disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #313244;
+      border: 1px solid #45475a;
+      border-radius: 14px;
+    }
+
+    .switch-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .switch-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #cdd6f4;
+    }
+
+    .switch-state {
+      font-size: 11px;
+      color: #a6adc8;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 30px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #585b70;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      left: 4px;
+      top: 4px;
+      background: #f5f5f7;
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+    }
+
+    .switch input:checked + .slider {
+      background: #cba6f7;
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(22px);
+    }
+
+    .switch input:focus-visible + .slider {
+      outline: 2px solid #cba6f7;
+      outline-offset: 2px;
+    }
+
+    .switch input:disabled + .slider {
+      background: #45475a;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .switch-row.disabled {
+      opacity: 0.65;
+    }
+
+    .switch-row.disabled .switch-title,
+    .switch-row.disabled .switch-state {
+      color: #8b8fa8;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 12px;
+      min-height: 16px;
+      text-align: center;
+    }
+
+    .status.success { color: #a6e3a1; }
+    .status.error   { color: #f38ba8; }
+    .status.info    { color: #f9e2af; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Browser Pet</h1>
+    <span id="domain">Loading...</span>
+  </header>
+
+  <div class="toggle-row" id="toggle-row">
+    <p class="theme-description" id="theme-desc">Launch a small animated cat that walks around the current page. No site styling is changed.</p>
+    <div class="switch-row" id="switch-row">
+      <div class="switch-copy">
+        <span class="switch-title">Browser Pet</span>
+        <span class="switch-state" id="toggle-state">Off</span>
+      </div>
+      <label class="switch" for="toggle-input" aria-label="Toggle Browser Pet">
+        <input id="toggle-input" type="checkbox" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="controls" id="controls">
+      <div class="control-card">
+        <div class="field">
+          <div class="field-row">
+            <label for="speed-input">Speed</label>
+            <span class="field-note" id="speed-value">1x</span>
+          </div>
+          <input id="speed-input" type="range" min="0.25" max="3" step="0.25" value="1" />
+          <p class="field-note">Controls how quickly the cat moves.</p>
+        </div>
+
+        <div class="field">
+          <label for="mode-select">Movement style</label>
+          <select id="mode-select">
+            <option value="random">Random crawl</option>
+            <option value="mouse">Follow mouse</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="check-row">
+            <div>
+              <div class="check-copy">Crawl only at bottom</div>
+              <p class="field-note">Keeps the cat near the bottom edge of the page.</p>
+            </div>
+            <input id="bottom-only-input" type="checkbox" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="status" id="status"></p>
+
+  <script src="dist/popup.js"></script>
+</body>
+</html>
